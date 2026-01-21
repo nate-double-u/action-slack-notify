@@ -6,13 +6,6 @@ mode="WEBHOOK"
 if [[ -z "$SLACK_WEBHOOK" ]]; then
     flag=1
     missing_secret="SLACK_WEBHOOK"
-    if [[ -n "$VAULT_ADDR" ]] && [[ -n "$VAULT_TOKEN" ]]; then
-        flag=0
-        echo -e "[\e[0;33mWARNING\e[0m] Both \`VAULT_ADDR\` and \`VAULT_TOKEN\` are provided. Using Vault for secrets. This feature is deprecated and will be removed in future versions. Please provide the credentials directly.\n"
-    fi
-    if [[ -n "$VAULT_ADDR" ]] || [[ -n "$VAULT_TOKEN" ]]; then
-        missing_secret="VAULT_ADDR and/or VAULT_TOKEN"
-    fi
 fi
 
 if [[ "$flag" -eq 1 ]] && [[ -n "$SLACK_TOKEN" || -n "$SLACK_CHANNEL" ]] ; then
@@ -39,13 +32,6 @@ if [[ -n "$SLACK_FILE_UPLOAD" ]]; then
   fi
 fi
 
-# custom path for files to override default files
-custom_path="$GITHUB_WORKSPACE/.github/slack"
 main_script="/main.sh"
-
-if [[ -d "$custom_path" ]]; then
-    rsync -av "$custom_path/" /
-    chmod +x /*.sh
-fi
 
 bash "$main_script"
