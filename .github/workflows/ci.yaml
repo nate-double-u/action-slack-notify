@@ -1,0 +1,47 @@
+name: CI
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  go-build:
+    name: Go Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Build
+        run: go build -v ./...
+      - name: Vet
+        run: go vet ./...
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: sudo apt-get install -y shellcheck
+      - name: Lint shell scripts
+        run: shellcheck entrypoint.sh main.sh
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t slack-notify-test .
+      - name: Verify entrypoint exists
+        run: docker run --rm --entrypoint cat slack-notify-test /entrypoint.sh > /dev/null
+      - name: Verify main script exists
+        run: docker run --rm --entrypoint cat slack-notify-test /main.sh > /dev/null
+      - name: Verify slack-notify binary
+        run: docker run --rm --entrypoint which slack-notify-test slack-notify
