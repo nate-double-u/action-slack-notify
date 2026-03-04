@@ -22,21 +22,6 @@ if [[ -n "$user_slack_channel" ]]; then
 	export SLACK_CHANNEL="$user_slack_channel"
 fi
 
-# Check vault only if SLACK_WEBHOOK is empty.
-if [[ -z "$SLACK_WEBHOOK" ]]; then
-
-	# Login to vault using GH Token
-	if [[ -n "$VAULT_GITHUB_TOKEN" ]]; then
-		unset VAULT_TOKEN
-		vault login -method=github token="$VAULT_GITHUB_TOKEN" > /dev/null
-	fi
-
-	if [[ -n "$VAULT_GITHUB_TOKEN" ]] || [[ -n "$VAULT_TOKEN" ]]; then
-		SLACK_WEBHOOK="$(vault read -field=webhook secret/slack)"
-		export SLACK_WEBHOOK
-	fi
-fi
-
 if [[ -z "$SLACK_WEBHOOK" ]]; then
   printf "[\e[0;31mERROR\e[0m] Secret \`SLACK_WEBHOOK\` is missing. Falling back to using \`SLACK_TOKEN\` and \`SLACK_CHANNEL\`.\n"
 fi

@@ -19,8 +19,6 @@ FROM alpine@sha256:865b95f46d98cf867a156fe4a135ad3fe50d2056aa3f25ed31662dff6da4e
 
 COPY --from=builder /go/bin/slack-notify /usr/bin/slack-notify
 
-ENV VAULT_VERSION 1.0.2
-
 RUN apk update \
 	&& apk upgrade \
 	&& apk add \
@@ -29,15 +27,8 @@ RUN apk update \
 		ca-certificates \
 		python3 \
 		py3-pip \
-		rsync \
 	&& python3 -m pip install --break-system-packages shyaml \
 	&& rm -rf /var/cache/apk/*
-
-# Setup Vault
-RUN wget https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_amd64.zip && \
-	unzip vault_${VAULT_VERSION}_linux_amd64.zip && \
-	rm vault_${VAULT_VERSION}_linux_amd64.zip && \
-	mv vault /usr/local/bin/vault
 
 # fix the missing dependency - https://stackoverflow.com/a/35613430
 RUN mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
